@@ -371,8 +371,23 @@ This plan is the input to Step 5.
 
 Check available API keys in this order:
 
-1. Read `.env` file in the current directory or parent directories (up to 3 levels)
-2. Check environment variables via `echo $VAR_NAME`
+1. Read `.env` file in the current directory or parent directories (up to 3 levels). **SECURITY: When loading keys from `.env`, use `source` or `export` in bash but NEVER echo/print the raw key value.** Load with:
+   ```bash
+   # Load .env without exposing values — set -a exports all vars, output is suppressed
+   if [ -f .env ]; then set -a; source .env; set +a; fi
+   ```
+2. Check whether environment variables are set via `[ -n "$VAR_NAME" ] && echo "✓ VAR_NAME is set" || echo "✗ VAR_NAME not set"` — **NEVER use `echo $VAR_NAME`** as this prints the raw secret to the terminal.
+
+### API Key Security Rules
+
+**CRITICAL — never expose API keys in terminal output:**
+- **Detection**: Use `[ -n "$VAR_NAME" ]` to check existence. NEVER `echo $VAR_NAME`.
+- **Loading from .env**: Use `set -a; source .env; set +a` — do NOT `cat .env` or `grep .env`.
+- **Curl commands**: Always use `$VAR_NAME` shell variable references (they expand at runtime but are NOT echoed by default). If using `set -x` or `bash -x`, ensure it is disabled before running curl commands with keys.
+- **Masking for display**: If you ever need to confirm a key is loaded, show only a masked version:
+  ```bash
+  echo "${VAR_NAME:0:4}****${VAR_NAME: -4}" # shows first 4 and last 4 chars only
+  ```
 
 ### Supported providers and their env vars:
 
