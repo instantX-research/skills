@@ -5,7 +5,7 @@ A Claude Code skill that rewrites everyday text into the aesthetic voice of icon
 ## Installation
 
 ```bash
-npx skills install brand-quill
+npx skills add https://github.com/instantX-research/skills --skill brand-quill
 ```
 
 Or manually copy into your Claude Code skills directory:
@@ -27,15 +27,7 @@ Not translation — regeneration. The copy is born again in the brand's way of t
 ### Examples
 
 ```
-/brand-quill 下雨天不想上班，只想窝在沙发上 --style ikea
-```
-
-```
-/brand-quill 下雨天 --style muji --mood positive
-```
-
-```
-/brand-quill 下雨天 --style aesop --mood negative
+/brand-quill 下雨天不想上班，只想窝在沙发上 --style muji
 ```
 
 ```
