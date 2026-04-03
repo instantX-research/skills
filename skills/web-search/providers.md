@@ -11,7 +11,7 @@ Loaded on-demand by the web-search skill during Steps 4–5.
 
 ```bash
 _env_loaded=0
-for d in . .. ../.. ../../.. skills/web-search skills/skills/web-search; do
+for d in . .. ../.. ../../.. skills/web-search skills/skills/web-search ~/.claude/skills/web-search; do
   if [ "$_env_loaded" -eq 0 ] && [ -f "$d/.env" ]; then
     set -a; source "$d/.env"; set +a; _env_loaded=1
   fi
