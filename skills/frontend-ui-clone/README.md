@@ -5,7 +5,7 @@ A Claude Code skill that clones any website into a pixel-perfect, self-contained
 ## Installation
 
 ```bash
-npx skills install frontend-ui-clone
+npx skills add https://github.com/instantX-research/skills --skill frontend-ui-clone
 ```
 
 Or manually copy into your Claude Code skills directory:
