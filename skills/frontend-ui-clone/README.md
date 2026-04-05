@@ -22,6 +22,41 @@ Uses Playwright to render the target page in a real Chromium browser, then direc
 URL ──► Playwright render ──► Extract DOM + CSS ──► Assemble .html ──► Screenshot compare ──► Fix & verify
 ```
 
+## The Frontend Skill Family
+
+This skill is part of a three-skill pipeline. Each skill handles a different stage of the website-to-product workflow:
+
+```
+                ┌─────────────────────┐
+                │   frontend-ui       │  Generate from scratch
+                │   (design + code)   │  "Build a landing page for..."
+                └─────────────────────┘
+
+                ┌─────────────────────┐
+  URL ────────► │  frontend-ui-clone  │ ────────► clone.html
+                │  (pixel-perfect)    │           (single file)
+                └─────────────────────┘
+                                                      │
+                                                      ▼
+                                          ┌─────────────────────┐
+                                          │  frontend-reactor   │ ────────► Next.js project
+                                          │  (componentize)     │           (npm run dev)
+                                          └─────────────────────┘
+```
+
+| Skill | Role | Input | Output |
+|-------|------|-------|--------|
+| **frontend-ui** | Design + generate new UI from scratch | Text description, reference URL, screenshot | Production-ready HTML/TSX |
+| **frontend-ui-clone** | Pixel-perfect website cloning | URL | Self-contained `.html` file |
+| **frontend-reactor** | Convert static HTML to React project | Clone `.html` file(s) or URL | Runnable Next.js project |
+
+**Typical workflows:**
+
+- **Clone & convert:** `/frontend-ui-clone https://linear.app` → `/frontend-reactor clone-linear.html`
+- **Clone multiple pages, then convert:** Clone several pages → `/frontend-reactor clone-linear*.html`
+- **URL shortcut:** `/frontend-reactor https://linear.app` (auto-clones homepage, then converts)
+- **Design from scratch:** `/frontend-ui a SaaS landing page` (no cloning — generates original UI)
+
 ## Usage
 
 ```
