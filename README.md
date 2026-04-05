@@ -12,6 +12,7 @@ A collection of **Claude Code / agent skills**. Each skill lives under `skills/<
 | [`brand-quill`](skills/brand-quill/) | Rewrites everyday text into the aesthetic voice of iconic brands (MUJI, Apple, Aesop, Patagonia, etc.). Supports ZH/EN/JA multilingual output with scene-specific styles. |
 | [`frontend-ui-clone`](skills/frontend-ui-clone/) | Pixel-perfect website cloner. Given a URL, reproduces the page as a single self-contained HTML file using browser rendering + DOM extraction. |
 | [`frontend-ui`](skills/frontend-ui/) | High-aesthetic frontend UI generator. Analyzes reference URLs or screenshots to extract design DNA, generates production-ready UI with the polish of Linear, Vercel, Stripe, etc. |
+| [`frontend-reactor`](skills/frontend-reactor/) | Converts cloned website HTML files into production-ready React/Next.js projects with proper component architecture, CSS decomposition, routing, and interactivity. |
 | [`find-best-skill`](skills/find-best-skill/) | Compares overlapping skills to identify the best one for a given use case. Performs functional analysis and optionally runs parallel tests. |
 
 

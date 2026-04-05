@@ -46,9 +46,9 @@ This skill is part of a three-skill pipeline. Each skill handles a different sta
 
 | Skill | Role | Input | Output |
 |-------|------|-------|--------|
-| **frontend-ui** | Design + generate new UI from scratch | Text description, reference URL, screenshot | Production-ready HTML/TSX |
+| [**frontend-ui**](../frontend-ui/) | Design + generate new UI from scratch | Text description, reference URL, screenshot | Production-ready HTML/TSX |
 | **frontend-ui-clone** | Pixel-perfect website cloning | URL | Self-contained `.html` file |
-| **frontend-reactor** | Convert static HTML to React project | Clone `.html` file(s) or URL | Runnable Next.js project |
+| [**frontend-reactor**](../frontend-reactor/) | Convert static HTML to React project | Clone `.html` file(s) or URL | Runnable Next.js project |
 
 **Typical workflows:**
 
