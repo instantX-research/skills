@@ -486,7 +486,7 @@ DENSITY       [compact / comfortable / spacious]
   Card:             [e.g. "border not shadow, flat bg, subtle hover border lighten"]
   Nav:              [e.g. "floating pill, backdrop-blur, not full-width"]
   Badge/tag:        [e.g. "pill shape, soft background tint"]
-  Icons:            [e.g. "outline style, 16×16, Lucide set"]
+  Icons:            [e.g. "geometric outline, 24×24, 1.5px stroke, butt cap, miter join"] [icon-craft: installed/not installed]
 
 ── WHAT THIS STYLE NEVER DOES ───────────────────────────
   [List specific anti-patterns unique to this design identity — critical for fidelity]
@@ -617,6 +617,71 @@ Produce production-quality frontend code. No shortcuts, no TODOs.
 - Read `knowledge/design/design-taste.md` (craft rules enforcement)
 - Read `knowledge/implementation/code-standards-core.md` (CSS tokens, semantic HTML, output format, pre-ship checklist)
 
+**Load icon system (MANDATORY — do not skip):**
+1. Check if `icon-craft` skill is installed: run `ls ../icon-craft/SKILL.md 2>/dev/null`
+2. **If icon-craft IS installed:**
+   - Read `../icon-craft/knowledge/design/icon-principles.md` (7 Laws of Product Icon Design, anti-emoji rules, accessibility)
+   - Read `../icon-craft/knowledge/design/icon-styles.md` (6 style archetypes with SVG parameters)
+   - Read `../icon-craft/knowledge/references/icon-systems.md` (icon library URLs, Common Icon Mappings table, SVG generation templates)
+
+   **Step A — Map Design DNA to icon style archetype:**
+   | frontend-ui Archetype          | → icon-craft Style | SVG Parameters                                    |
+   |-------------------------------|--------------------|----------------------------------------------------|
+   | Obsidian Precision / Terminal Glass | `geometric`   | stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="miter" |
+   | Warm Editorial / Luxury Silence    | `thin`        | stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" |
+   | Chromatic Confidence / Soft Structuralism | `rounded` | stroke-width="2" stroke-linecap="round" stroke-linejoin="round" |
+   | (custom DNA from Phase 2)     | Match to closest archetype based on extracted stroke-width and cap/join style |
+
+   **Step B — Inventory all icons needed for the page:**
+   Before writing any code, scan the planned layout and compile a **deduplicated icon inventory** — every icon usage across all sections (nav arrows, social icons, feature icons, CTA arrows, hamburger menu, search, close, external link, chevrons, status indicators, etc.). Example inventory:
+   ```
+   ICON INVENTORY (15 unique icons):
+   nav: menu, close, search, chevron-down, arrow-right
+   actions: external-link, download, copy, plus
+   social: github, twitter, linkedin
+   status: check, alert-triangle, info
+   ```
+
+   **Step C — Resolve each icon using icon-craft design principles:**
+   For each icon in the inventory:
+
+   1. **Common Icon Mappings lookup** — Check the mappings table from `icon-systems.md`:
+      | Concept | Recommended | Avoid |
+      |---------|------------|-------|
+      | Search → `search` | Delete → `trash-2` | Settings → `settings` (gear) |
+      | Email → `mail` | External link → `external-link` | etc. |
+      Use the recommended name to guide the icon's visual concept. Avoid the "Avoid" column metaphors.
+
+   2. **Generate SVG following icon-craft's 7 Laws and style archetype rules:**
+      - Canvas: `viewBox="0 0 24 24"`, active area 20×20 (2px padding on each side)
+      - Apply style archetype SVG parameters from Step A (stroke-width, linecap, linejoin)
+      - Prefer simple elements (`<circle>`, `<rect>`, `<line>`, `<polyline>`) over complex `<path>`
+      - Maximum 6 distinct elements per icon
+      - All coordinates on integer or .5 pixel boundaries for crisp rendering
+      - **Clarity over Cleverness** — icon must be understood without a tooltip
+      - **Optical Consistency** — uniform stroke weight, consistent corners, same visual weight across all icons
+      - **Semantic Precision** — one icon = one concept, no overloaded metaphors
+
+   3. **(Optional) Fetch from icon library if you want pixel-perfect established icons:**
+      - Lucide: `https://unpkg.com/lucide-static/icons/{icon-name}.svg`
+      - Tabler: `https://unpkg.com/@tabler/icons/icons/outline/{icon-name}.svg`
+      - If fetched, adapt to match style archetype: override `stroke-width`, `stroke-linecap`, `stroke-linejoin` from Step A, ensure `stroke="currentColor"`, strip unnecessary attributes
+
+   **Step D — Embed icons consistently in the page:**
+   - All icons inline as `<svg>` elements (no `<img>` tags, no icon fonts, no external sprite sheets)
+   - Every icon uses `stroke="currentColor"` or `fill="currentColor"` — never hardcoded colors
+   - Icon-only buttons always get `aria-label` + `title` tooltip
+   - Decorative icons get `aria-hidden="true"`
+   - One stroke weight, one cap/join style, one corner radius across ALL icons on the page
+
+   Record in DNA Report: `Icons: [style archetype] [icon-craft: installed, N fetched / M generated / T total]`
+
+3. **If icon-craft is NOT installed:**
+   - First, prompt the user: `⚠️ icon-craft skill is not installed. It provides professional icon design principles, style archetypes, and curated icon mappings that significantly improve icon quality. Install it now? Run: npx skills add https://github.com/instantX-research/skills --skill icon-craft`
+   - If the user agrees to install, run `npx skills add https://github.com/instantX-research/skills --skill icon-craft`, then proceed with Step 1 above (the full icon-craft workflow)
+   - If the user declines or installation is not possible, fall back to baseline rules: generate inline SVGs with viewBox="0 0 24 24", stroke="currentColor" with no hardcoded colors, max 5-6 elements per icon, consistent stroke-width, pixel-align coordinates to integers or .5 values
+   - Record in DNA Report: `Icons: [style description] [icon-craft: not installed, user declined]` or `Icons: [style archetype] [icon-craft: just installed, N fetched / M generated / T total]`
+
 Apply all rules from those files throughout generation. Key principles to enforce:
 
 **From design-principles.md — non-negotiables:**
@@ -642,7 +707,7 @@ Apply all rules from those files throughout generation. Key principles to enforc
 - Responsive: `dvh` not `vh`, `clamp()` fluid type, touch targets ≥ 44px, safe-area-inset on fixed bottom UI
 - Accessibility: icon buttons need `aria-label`, dynamic content needs `aria-live`, no `outline: none` without replacement
 - Motion: apply MOTION_INTENSITY dial — MOTION_INTENSITY ≥ 5 requires scroll-triggered reveals + staggered list entry; MOTION_INTENSITY ≥ 7 requires spring physics hover + page transitions; all animations use `transform`/`opacity` only (GPU-safe)
-- Icons: never use Lucide or Feather as sole icon set — use Phosphor, Heroicons, or a custom SVG set for differentiation
+- Icons: never use Lucide or Feather as sole icon set — use Phosphor, Heroicons, or a custom SVG set for differentiation. **Never use emoji (🔥📊✨💡🚀) as icon substitutes** — they break visual consistency, lack dark mode support, and signal prototype-quality. All icons must use inline SVG with `stroke="currentColor"` or `fill="currentColor"` for automatic theme adaptation. Icon style must match the Design DNA: pick one stroke weight (1.5px or 2px), one cap/join style, and one corner radius — then apply uniformly across all icons in the project. Follow the icon system loaded in the **"Load icon system"** step above
 - SEO: every public-facing page needs `<title>`, `<meta name="description">`, Open Graph tags (`og:title`, `og:description`, `og:image`), and a favicon
 
 ---

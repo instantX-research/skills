@@ -13,7 +13,9 @@ A collection of **Claude Code / agent skills**. Each skill lives under `skills/<
 | [`frontend-ui-clone`](skills/frontend-ui-clone/) | Pixel-perfect website cloner. Given a URL, reproduces the page as a single self-contained HTML file using browser rendering + DOM extraction. |
 | [`frontend-reactor`](skills/frontend-reactor/) | Converts cloned website HTML files into production-ready React/Next.js projects with proper component architecture, CSS decomposition, routing, and interactivity. |
 | [`frontend-ui`](skills/frontend-ui/) | High-aesthetic frontend UI generator. Analyzes reference URLs or screenshots to extract design DNA, generates production-ready UI with the polish of Linear, Vercel, Stripe, etc. |
+| [`icon-craft`](skills/icon-craft/) | Product-grade icon designer and curator. Loads icon design principles and style guidelines, searches icon libraries or generates custom SVG/PNG icons. Supports 6 style archetypes calibrated against Lucide, Phosphor, Heroicons, etc. |
 | [`find-best-skill`](skills/find-best-skill/) | Compares overlapping skills to identify the best one for a given use case. Performs functional analysis and optionally runs parallel tests. |
+| [`dont-to-do`](skills/dont-to-do/) | Converts negative and vague prompt constraints into specific, actionable positive directives in-place. Three-phase compiler pipeline: Scan → Transform → Backfill. |
 
 
 ## Installation

@@ -28,6 +28,11 @@ Use `WebFetch` on the target URL. Extract:
 - `padding`, `margin`, `gap` patterns (identify the grid unit)
 - `border-radius`, `box-shadow`, `transition`, `animation` declarations
 - All `<link rel="stylesheet">` URLs
+- `max-width` on containers and content wrappers
+- `grid-template-columns`, `grid-template-rows`, `display: grid/flex` patterns
+- `@media` breakpoint values (min-width / max-width thresholds)
+- Header/nav height, `position: sticky/fixed`, footer column structure
+- Section-level `padding-block` / `padding-top` / `padding-bottom` values
 
 After Step 1, evaluate JS-render signal: count distinct color values extracted. Also check for SPA markers:
 - `<div id="root">` or `<div id="app">` with no meaningful children
@@ -128,7 +133,52 @@ WebSearch: `"[brand]" design system`, `"[brand]" brand guidelines`, `site:figma.
 **SPACING — grid system**
 Base unit: 4px or 8px (GCF of observed values). Common 8px scale: 4/8/12/16/20/24/32/40/48/64/80/96/128px.
 
-**LAYOUT — brand signatures:** → See `knowledge/references/brand-references.md` Layout Signatures section for per-brand max-width, section rhythm, and signature patterns.
+**LAYOUT — full structural analysis**
+Extract the complete layout skeleton from the reference site:
+
+1. **Grid system** — container max-width, column count per breakpoint, gap values, nesting depth
+2. **Breakpoints** — identify the exact pixel values where layout shifts occur (stack→2-col→3-col, nav collapse, etc.). Record observed breakpoints, not assumed ones.
+3. **Section layout patterns** — for each major section, record:
+   - Layout type: centered stack / split (left-right) / bento grid / card grid / full-bleed / alternating rows
+   - Column ratio: 50/50, 40/60, 33/67, or asymmetric
+   - Alignment: left-aligned body vs. centered body vs. mixed
+   - Direction: does the layout alternate (text-left/image-right → image-left/text-right)?
+4. **Header skeleton** — layout type (flex row), logo position (left/center), nav position (center/right), CTA cluster position, height, sticky behavior
+5. **Footer skeleton** — column count, column ratio (e.g. 2fr 1fr 1fr 1fr), bottom bar layout
+6. **Vertical spacing chain** — the distance between elements within a section: label → title (gap), title → description (gap), description → content/cards (gap)
+7. **Section-to-section rhythm** — actual px values between sections (e.g. Hero→Features: 120px, Features→Steps: 96px)
+
+→ Also see `knowledge/references/brand-references.md` Layout Signatures section for per-brand max-width, section rhythm, and signature patterns.
+
+**COMPONENTS — UI element signatures**
+For each major interactive element, record:
+- Button: fill style (solid/ghost/outline), radius, height, font-weight, hover effect
+- Card: border vs. shadow, background, hover state, padding, internal spacing
+- Input: border style, radius, focus ring, label placement
+- Nav: layout, item style, active indicator, mobile collapse pattern
+- Badge/tag: shape (pill/rounded-rect), sizing, color treatment (tinted bg vs. outline)
+- Link: decoration (underline/none), color, hover behavior
+- Any distinctive patterns unique to the site (e.g. custom toggles, command palette, accordions)
+
+**ICONOGRAPHY**
+- Style: outline / filled / duotone / mixed
+- Default size and size scale
+- Library identification: inspect SVG class names, `data-*` attributes, or known path patterns (Lucide, Heroicons, Phosphor, Feather, custom)
+- Stroke width consistency
+- Usage density: icons everywhere vs. minimal decorative use
+
+**IMAGERY**
+- Photography: present or absent? If present: product screenshots, lifestyle, abstract, stock?
+- Treatment: border-radius, overlays, filters (grayscale, blur, color tint)
+- Aspect ratios used for hero images, feature images, thumbnails
+- Illustration style: none / line art / 3D / isometric
+- Video usage: none / hero bg / inline product demos
+
+**COPY PATTERNS**
+- Headline construction: statement ("Ship faster") / question ("Ready to scale?") / imperative ("Build something great") / fragment ("The future of X")
+- CTA copy style: action-first ("Start building") vs. benefit-first ("Get 10x faster")
+- Label casing: ALL CAPS micro-labels, Sentence case, Title Case
+- Overall tone: technical precision / conversational warmth / aspirational / brutally minimal
 
 **SURFACES** — shadow scale xs→xl, border-radius scale, border style (rgba vs. solid), glass/blur effects.
 
@@ -161,7 +211,7 @@ DENSITY       [compact / comfortable / spacious]
   Accent primary:   [hex]  [where used, frequency]
   Accent hover:     [hex]
   Success/Warning/Error: [hex each]
-  Dark mode:        [yes/no]
+  Dark mode:        [yes/no — if yes, note mapping: which tokens invert, which stay fixed]
 
 ── TYPOGRAPHY ───────────────────────────────────────────
   Heading font:     [name]  [classification]  [weights]
@@ -177,6 +227,24 @@ DENSITY       [compact / comfortable / spacious]
   Content max-w:    [e.g. 1280px]
   Section padding:  [vertical rhythm]
 
+── LAYOUT ───────────────────────────────────────────────
+  Grid system:      [e.g. "12-col implicit, max-w 1320px, gap 24px"]
+  Breakpoints:      [e.g. sm:640px / md:768px / lg:1024px / xl:1280px]
+  Header:           [e.g. "flex row, logo-left, nav-center, CTAs-right, h-76px, sticky on scroll"]
+  Footer:           [e.g. "4-col grid (2fr 1fr 1fr 1fr), bottom bar flex between"]
+
+  Section layouts (in page order):
+    Hero:           [e.g. "centered stack, max-w 1120px, text-center"]
+    Features:       [e.g. "alternating split rows 50/50, image flips side each row"]
+    Steps:          [e.g. "4-col card grid, equal width"]
+    Testimonials:   [e.g. "3-col card grid"]
+    FAQ:            [e.g. "centered single-col, max-w 680px, accordion"]
+    CTA:            [e.g. "centered stack, max-w 520px"]
+
+  Vertical chain:   [e.g. "label→title: 16px, title→desc: 16px, desc→content: 48px"]
+  Section rhythm:   [e.g. "Hero→Features: 120px, Features→Steps: 96px, Steps→CTA: 120px"]
+  Alignment rule:   [e.g. "hero centered, all body sections left-aligned"]
+
 ── SURFACES ─────────────────────────────────────────────
   Radius scale:     [sm/md/lg/xl/pill values]
   Shadow scale:     [xs → xl values]
@@ -187,6 +255,36 @@ DENSITY       [compact / comfortable / spacious]
   Duration scale:   [e.g. 150/200/300ms]
   Easing:           [cubic-bezier value]
   Hover pattern:    [e.g. "opacity + translateY(-1px)"]
+
+── COMPONENTS ───────────────────────────────────────────
+  Button primary:   [e.g. "solid white, radius-lg, 600 weight, h-10/h-12, no shadow"]
+  Button secondary: [e.g. "ghost with border, same radius, white text"]
+  Input:            [e.g. "full border, radius-sm, focus ring with accent"]
+  Card:             [e.g. "border not shadow, flat dark bg, subtle hover border lighten"]
+  Nav:              [e.g. "full-width top bar, minimal links, logo left / CTAs right"]
+  Badge/tag:        [e.g. "pill shape, soft tinted background, 11px semibold"]
+  Link:             [e.g. "underline on hover, accent color, no visited style"]
+  [add more if site uses distinctive patterns: toggles, tabs, modals, tooltips, etc.]
+
+── ICONOGRAPHY ──────────────────────────────────────────
+  Style:            [outline / filled / duotone / mixed]
+  Size system:      [e.g. 16×16 default, 20×20 nav, 24×24 feature]
+  Library:          [Lucide / Heroicons / Phosphor / custom SVG / none]
+  Stroke width:     [e.g. 1.5px / 2px]
+  Usage density:    [minimal (nav+footer only) / moderate / icon-heavy]
+
+── IMAGERY ──────────────────────────────────────────────
+  Photography:      [none / product screenshots / lifestyle / abstract / AI-generated]
+  Image treatment:  [e.g. "radius-xl, no overlay" or "grayscale + color on hover"]
+  Aspect ratios:    [e.g. "16:10 for features, 1:1 for avatars"]
+  Illustration:     [none / line art / 3D / isometric / hand-drawn]
+  Video:            [none / hero background / inline demo]
+
+── COPY PATTERNS ────────────────────────────────────────
+  Headline style:   [statement / question / imperative / fragment]
+  CTA language:     [e.g. "Start free trial" / "Get started" — action-first or benefit-first]
+  Label casing:     [uppercase micro-labels / sentence case / title case]
+  Tone:             [technical / conversational / aspirational / minimal]
 
 ── BEHAVIORS ────────────────────────────────────────────
   Interaction model:   [scroll-driven / click-driven / hybrid]
