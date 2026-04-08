@@ -2022,7 +2022,8 @@ Write to `$(pwd)/test_outputs/clone-[domain].html`.
 
 ### Clone Report
 
-Output this report to the user:
+Save this report as a markdown file alongside the HTML output, using the same filename with `.md` extension
+(e.g., `clone-obsidian.html` → `clone-obsidian.md`). Then output the report to the user:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2064,7 +2065,7 @@ TO REFINE
 ### Cleanup Intermediate Files
 
 After the report, remove all intermediate screenshots generated during QA rounds.
-Only the final `.html` clone file should remain in `test_outputs/`.
+Only the final `.html` clone file and its `.md` report should remain in `test_outputs/`.
 
 ```bash
 # Remove all intermediate PNG screenshots from test_outputs
