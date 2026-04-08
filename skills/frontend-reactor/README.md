@@ -19,7 +19,7 @@ cp -r skills/frontend-reactor ~/.claude/skills/
 **frontend-reactor** takes static HTML files (typically produced by [`frontend-ui-clone`](#the-frontend-skill-family)) and transforms them into fully scaffolded React/Next.js projects. It parses semantic sections, decomposes CSS, generates typed components, wires up routing and navigation, and restores interactive behaviors — all verified by a real `npm run build`.
 
 ```
-Clone HTML ──► Section mapping ──► CSS decomposition ──► JSX components ──► Next.js scaffold ──► Build & verify
+Clone HTML ──► Section mapping ──► CSS decomposition ──► JSX components ──► Next.js scaffold ──► Build & verify ──► Playwright validation
 ```
 
 ## The Frontend Skill Family
@@ -120,6 +120,7 @@ Output: `results/split-[domain]/index.html` + `styles.css` + `scripts.js`
 | `--simple` | (flag) | off | Non-React: clean HTML + CSS split |
 | `--download-assets` | (flag) | off | Download images/fonts to `public/` |
 | `--output` | path | `results/reactor-[domain]/` | Custom output directory |
+| `--validate` | (flag) | off (on for Mode C) | Playwright visual & interaction validation |
 
 ## Conversion Pipeline
 
@@ -183,6 +184,22 @@ Runs `npm run build` and auto-fixes common errors (up to 3 rounds):
 - `usePathname` in server components → add `'use client'`
 - Image hostnames → add to `next.config.mjs` remotePatterns
 
+### Phase 6 — Playwright Visual & Interaction Validation
+
+Enabled with `--validate` flag (automatic for Mode C). Starts the dev server and uses Playwright to compare the converted project against the original site:
+
+| Check | What it does | Output |
+|-------|-------------|--------|
+| **Visual fidelity** | Full-page screenshot diff at 3 viewports (desktop/tablet/mobile) | Similarity %, diff images |
+| **Interactive elements** | Count and match clickable elements by text + position | Missing/degraded element list |
+| **Hover states** | Screenshot before/after hover on top 10 elements | Missing hover effect list |
+| **Animations** | Compare @keyframes definitions, CSS transitions, animated elements | Missing animation list |
+| **Scroll behavior** | Check smooth scroll, sticky/fixed element parity | Match/mismatch flags |
+
+If critical issues are detected (visual < 80% or > 30% interactions missing), auto-fix is attempted (up to 2 rounds) — e.g., copying missing @keyframes, adding lost hover transitions, restoring `cursor: pointer`.
+
+**Overall validation score** (0–100): visual fidelity (40pts) + interactions (25pts) + hover states (15pts) + animations (15pts) + scroll (5pts).
+
 ## Output
 
 Projects are written to `results/reactor-[domain]/`:
@@ -205,6 +222,13 @@ results/reactor-linear/
 │   │   └── CTA.tsx
 │   └── icons.tsx               # Extracted SVG icons
 ├── public/                     # Downloaded assets (if --download-assets)
+├── validation-report/          # Playwright validation output (if --validate)
+│   ├── original-desktop.png    # Screenshot of original site
+│   ├── converted-desktop.png   # Screenshot of converted project
+│   ├── diff-desktop.png        # Pixel diff visualization
+│   ├── diff-tablet.png
+│   ├── diff-mobile.png
+│   └── validation-report.json  # Full structured report
 ├── next.config.mjs
 ├── package.json
 └── tsconfig.json
@@ -219,20 +243,20 @@ results/reactor-linear/
 
 ## Requirements
 
-For Mode C (URL input), **Playwright** is required:
+For Mode C (URL input) or `--validate` flag, **Playwright** and **Pillow** are required:
 
 ```bash
-pip install playwright
+pip install playwright Pillow
 playwright install chromium
 ```
 
-Modes A and B work with any clone HTML file — no external tools needed.
+Modes A and B without `--validate` work with any clone HTML file — no external tools needed.
 
 ## File Layout
 
 ```
 frontend-reactor/
-├── SKILL.md                              # Conversion pipeline — all 5 phases
+├── SKILL.md                              # Conversion pipeline — all 6 phases
 ├── README.md
 └── knowledge/
     ├── component-detection.md            # Section identification rules and signals
@@ -240,6 +264,7 @@ frontend-reactor/
     ├── html-to-jsx.md                    # HTML → JSX conversion rules
     ├── interactivity.md                  # Interactive pattern detection and restoration
     ├── nextjs-scaffold.md                # Project templates and scaffolding
+    ├── playwright-validation.md          # Visual & interaction validation scripts
     └── site-discovery.md                 # Playwright crawling patterns (Mode C)
 ```
 

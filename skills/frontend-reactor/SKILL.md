@@ -76,6 +76,7 @@ Parse `$ARGUMENTS` to detect the input type:
 | `--simple` | (flag) | off | Non-React output: clean HTML + CSS split only |
 | `--download-assets` | (flag) | off | Download images/fonts to local public/ |
 | `--output` | path | `$(pwd)/results/reactor-[domain]/` | Custom output directory |
+| `--validate` | (flag) | off (on for Mode C) | Run Playwright visual & interaction validation against the original site |
 
 ### Step 3 — Extract domain name for project naming
 
@@ -640,6 +641,8 @@ INTERACTIVITY RESTORED
 
 BUILD STATUS    ✓ Passed  /  ✗ Failed (see errors above)
 
+VALIDATION      [Skipped / see below]
+
 TO RUN
   cd [output-dir] && npm run dev
 
@@ -647,6 +650,144 @@ TO DEPLOY
   cd [output-dir] && vercel deploy
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
+
+If `--validate` is set (or Mode C), proceed to **Phase 6** for Playwright validation.
+
+---
+
+## Phase 6 — Playwright Visual & Interaction Validation
+
+**Load knowledge:** Read `knowledge/playwright-validation.md` for all validation scripts and diff algorithms.
+
+This phase runs when `--validate` is set, or automatically in Mode C (URL input). It requires the original site URL and a successful `npm run build` from Phase 5.
+
+### Step 1 — Start dev server
+
+```bash
+cd [output-dir]
+npm run dev -- -p 3000 &
+```
+
+Wait for `localhost:3000` to be ready (poll with socket connect, max 30s).
+
+### Step 2 — Visual screenshot comparison
+
+Capture full-page screenshots of both the original site and `localhost:3000` at three viewports:
+
+| Viewport | Size |
+|----------|------|
+| Desktop | 1440×900 |
+| Tablet | 768×1024 |
+| Mobile | 375×812 |
+
+Before capturing, normalize both pages:
+- Remove cookie banners/overlays
+- Force all animation durations to `0s` for consistent static captures
+- Scroll to bottom and back to trigger lazy loading
+- Force `opacity: 1` on animated elements
+
+Generate pixel diff images and calculate similarity scores per viewport.
+
+### Step 3 — Interactive element audit
+
+Run the interactive element detection script (same as `site-discovery.md` Phase A2) on both pages. Compare:
+
+1. **Count:** How many interactive elements exist on each page
+2. **Match by text + position:** Pair elements between original and converted
+3. **Signal degradation:** Elements that exist but lost interactivity signals (e.g., a link that lost `cursor-pointer`, a button that lost `has-popup`)
+4. **Missing elements:** Interactive elements on the original that are absent on the converted
+
+### Step 4 — Hover state comparison
+
+For the top 10 interactive elements (prioritizing nav links, buttons, CTAs):
+
+1. Screenshot each element before hover
+2. Hover over it, wait 500ms for transitions
+3. Screenshot after hover
+4. Pixel-diff the before/after for each element on both sites
+5. Flag elements where original has a visible hover effect but converted does not
+
+### Step 5 — Animation & transition diff
+
+Extract from both pages:
+
+1. **@keyframes definitions** — compare by name; flag missing keyframes
+2. **CSS transitions** — compare `transition-property` + `transition-duration` on interactive elements; flag transitions present on original but missing on converted
+3. **Animated elements** — elements with active `animation-name`; flag elements that were animated on the original but are static on the converted
+
+### Step 6 — Scroll & sticky element validation
+
+Compare:
+- `scroll-behavior: smooth` on `<html>`
+- Count of `position: sticky` elements
+- Count of `position: fixed` elements
+
+Flag any mismatches.
+
+### Step 7 — Auto-fix (up to 2 rounds)
+
+If critical issues are found (visual similarity < 80% on any viewport, OR > 30% of interactive elements missing):
+
+1. **Missing @keyframes** → copy the keyframe definition from the original CSS into `globals.css`
+2. **Missing hover transitions** → find the `:hover` rules for the flagged elements from the original CSS and add them to `globals.css`
+3. **Missing `cursor: pointer`** → add `cursor: pointer` to the element's CSS class
+4. **Missing sticky/fixed positioning** → check if `position: sticky/fixed` was dropped during CSS extraction
+
+After each fix round:
+- Re-run `npm run build`
+- Re-run the validation pipeline
+- Stop if scores improve above thresholds or after 2 rounds
+
+### Step 8 — Validation report
+
+Append validation results to the Phase 5 output report:
+
+```
+VALIDATION (Playwright)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Original URL       [url]
+  Dev server         localhost:3000
+
+  VISUAL FIDELITY
+    Desktop (1440px): [N]% similarity  [✓/△/✗]
+    Tablet  (768px):  [N]% similarity  [✓/△/✗]
+    Mobile  (375px):  [N]% similarity  [✓/△/✗]
+    Diff images saved to: [output-dir]/validation-report/
+
+  INTERACTIVE ELEMENTS
+    Matched:   [N]/[M] ([P]%)
+    Missing:   [N] — [list of missing element names]
+    Degraded:  [N] — [list of elements with lost signals]
+
+  HOVER STATES
+    Matching:       [N]/[M]
+    Missing hover:  [N] — [list]
+    Different hover: [N] — [list]
+
+  ANIMATIONS & TRANSITIONS
+    @keyframes matched: [N] | missing: [N] — [list]
+    Transitions matched: [N] | missing: [N]
+    Animated elements matched: [N] | missing: [N]
+
+  SCROLL BEHAVIOR
+    Smooth scroll:   [✓/✗]
+    Sticky elements: [✓/✗] (original: [N], converted: [M])
+    Fixed elements:  [✓/✗] (original: [N], converted: [M])
+
+  AUTO-FIX APPLIED
+    [N] fixes applied in [R] rounds
+    [list of fixes]
+
+  OVERALL SCORE      [N]/100
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**Overall score calculation:**
+- Visual fidelity (desktop): 40 points (proportional to similarity %)
+- Interactive element match rate: 25 points
+- Hover state match rate: 15 points
+- Animation/transition match rate: 15 points
+- Scroll behavior match: 5 points
 
 ---
 
